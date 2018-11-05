@@ -1,0 +1,26 @@
+#######################################
+# Syntax Coloring Map for ExtendedADCShield
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ExtendedADCShield	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+analogReadConfigNext	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SINGLE_ENDED	LITERAL1
+DIFFERENTIAL	LITERAL1
+UNIPOLAR	LITERAL1
+BIPOLAR	LITERAL1
+RANGE5V	LITERAL1
+RANGE10V	LITERAL1
