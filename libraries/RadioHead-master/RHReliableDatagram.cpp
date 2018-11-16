@@ -47,6 +47,8 @@ uint8_t RHReliableDatagram::retries()
 ////////////////////////////////////////////////////////////////////
 bool RHReliableDatagram::sendtoWait(uint8_t* buf, uint8_t len, uint8_t address)
 {
+
+
     // Assemble the message
     uint8_t thisSequenceNumber = ++_lastSequenceNumber;
     uint8_t retries = 0;
@@ -164,12 +166,14 @@ bool RHReliableDatagram::recvfromAckTimeout(uint8_t* buf, uint8_t* len, uint16_t
 
 uint32_t RHReliableDatagram::retransmissions()
 {
+
     return _retransmissions;
 }
 
 void RHReliableDatagram::resetRetransmissions()
 {
     _retransmissions = 0;
+
 }
  
 void RHReliableDatagram::acknowledge(uint8_t id, uint8_t from)

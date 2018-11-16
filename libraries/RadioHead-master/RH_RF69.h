@@ -916,6 +916,7 @@ public:
     /// \return true if sleep mode was successfully entered.
     virtual bool    sleep();
 
+
     /// Return the integer value of the device type
     /// as read from the device in from RH_RF69_REG_10_VERSION.
     /// Expect 0x24, depending on the type of device actually
@@ -924,6 +925,11 @@ public:
     uint16_t deviceType() {return _deviceType;};
 
     uint16_t intTim;
+    uint16_t _ACQ_RATE, _PHASE,ti;
+
+    long mm;
+
+
 
 
 protected:
@@ -932,7 +938,8 @@ protected:
     /// Should not need to be called by user code.
     void           handleInterrupt();
 
-    /// Low level function to read the FIFO and put the received data into the receive buffer
+
+     /// Low level function to read the FIFO and put the received data into the receive buffer
     /// Should not need to be called by user code.
     void           readFifo();
 

@@ -210,9 +210,12 @@ void RH_RF69::handleInterrupt()
     // has been done
     if (_mode == RHModeRx && (irqflags2 & RH_RF69_IRQFLAGS2_PAYLOADREADY))
     {
-    intTim=TCNT3;
 
- //   Serial.println("int");
+
+     //Serial.println(micros()-mm);
+     //mm=micros();
+
+    //Serial.println(intTim);
 	// A complete message has been received with good CRC
 	_lastRssi = -((int8_t)(spiRead(RH_RF69_REG_24_RSSIVALUE) >> 1));
 	_lastPreambleTime = millis();
@@ -231,6 +234,7 @@ void RH_RF69::handleInterrupt()
 void RH_RF69::readFifo()
 {
     ATOMIC_BLOCK_START;
+
     _spi.begin();
     digitalWrite(_slaveSelectPin, LOW);
     _spi.transfer(RH_RF69_REG_00_FIFO); // Send the start address with the write mask off
@@ -257,13 +261,13 @@ void RH_RF69::readFifo()
 	    _rxBufValid = true;
 	    if ((_buf[0]==83)&&(_buf[1]==0)) //sync message
 	    {
-            if(intTim<period){
-            TCNT3=1;
-            }
-            else{
-            TCNT3=OCR3A;
-            //
-            }
+            intTim=TCNT3;
+            TCNT3=_PHASE;
+            long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE + 1);
+            OCR3A=(unsigned int)p;
+            ti=0;
+
+            //Serial.println(OCR3A);
 	    }
 	}
     }

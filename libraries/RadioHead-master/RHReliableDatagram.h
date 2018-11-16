@@ -161,7 +161,10 @@ public:
 
     /// Resets the count of the number of retransmissions 
     /// to 0. 
-    void resetRetransmissions(); 
+    void resetRetransmissions();
+
+        /// Count of retransmissions we have had to send
+    uint32_t _retransmissions;
 
 protected:
     /// Send an ACK for the message id to the given from address
@@ -174,8 +177,7 @@ protected:
     bool haveNewMessage();
 
 private:
-    /// Count of retransmissions we have had to send
-    uint32_t _retransmissions;
+
 
     /// The last sequence number to be used
     /// Defaults to 0
