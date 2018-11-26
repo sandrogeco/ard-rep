@@ -17,6 +17,9 @@
 // Default timeout for waitCAD() in ms
 #define RH_CAD_DEFAULT_TIMEOUT            10000
 
+#define RH_SYNC_FLAG    83
+
+
 /////////////////////////////////////////////////////////////////////
 /// \class RHGenericDriver RHGenericDriver.h <RHGenericDriver.h>
 /// \brief Abstract base class for a RadioHead driver.

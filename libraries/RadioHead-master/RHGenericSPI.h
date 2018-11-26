@@ -109,6 +109,10 @@ public:
     /// Call this after you have finished using the SPI interface
     virtual void end() = 0;
 
+    /*virtual void beginTransaction() = 0;
+
+    virtual void endTransaction() = 0;*/
+
     /// Sets the bit order the SPI interface will use
     /// Sets the order of the bits shifted out of and into the SPI bus, either 
     /// LSBFIRST (least-significant bit first) or MSBFIRST (most-significant bit first). 

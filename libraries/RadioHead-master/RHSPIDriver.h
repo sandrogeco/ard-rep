@@ -84,10 +84,10 @@ public:
     /// pin that will be used for slave select in subsquent SPI operations.
     /// \param[in] slaveSelectPin The pin to use
     void setSlaveSelectPin(uint8_t slaveSelectPin);
-
+/*
 
     void        spiBeginTransaction();
-    void        spiEndTransaction();
+    void        spiEndTransaction();*/
 
 
 

@@ -20,6 +20,8 @@
 /// The default number of retries
 #define RH_DEFAULT_RETRIES 3
 
+
+
 /////////////////////////////////////////////////////////////////////
 /// \class RHReliableDatagram RHReliableDatagram.h <RHReliableDatagram.h>
 /// \brief RHDatagram subclass for sending addressed, acknowledged, retransmitted datagrams.
@@ -119,6 +121,8 @@ public:
     /// \return true if the message was transmitted and an acknowledgement was received.
     bool sendtoWait(uint8_t* buf, uint8_t len, uint8_t address);
 
+    bool sendtoWaitSync(uint8_t address);
+
     /// If there is a valid message available for this node, send an acknowledgement to the SRC
     /// address (blocking until this is complete), then copy the message to buf and return true
     /// else return false. 
@@ -165,6 +169,8 @@ public:
 
         /// Count of retransmissions we have had to send
     uint32_t _retransmissions;
+
+    uint8_t seconds;
 
 protected:
     /// Send an ACK for the message id to the given from address

@@ -51,18 +51,24 @@ bool RHGenericDriver::waitAvailableTimeout(uint16_t timeout)
 
 bool RHGenericDriver::waitPacketSent()
 {
-    while (_mode == RHModeTx)
+    while (_mode == RHModeTx){
 	YIELD; // Wait for any previous transmit to finish
+	}
     return true;
 }
 
 bool RHGenericDriver::waitPacketSent(uint16_t timeout)
 {
+//    Serial.print("Debug");
     unsigned long starttime = millis();
     while ((millis() - starttime) < timeout)
     {
-        if (_mode != RHModeTx) // Any previous transmit finished?
+        if (_mode != RHModeTx){ // Any previous transmit finished?
+//            Serial.print("m");
+//            Serial.println(millis() - starttime);
            return true;
+
+        }
 	YIELD;
     }
     return false;

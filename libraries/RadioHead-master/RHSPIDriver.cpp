@@ -26,8 +26,8 @@ bool RHSPIDriver::init()
     delay(100);
     return true;
 }
-/*
 
+/*
 void RHSPIDriver::spiBeginTransaction()
 {
     #if defined(SPI_HAS_TRANSACTION)
@@ -41,8 +41,9 @@ void RHSPIDriver::spiEndTransaction()
         _spi.endTransaction();
      #endif
 }
-
 */
+
+
 
 uint8_t RHSPIDriver::spiRead(uint8_t reg)
 {
@@ -64,6 +65,7 @@ uint8_t RHSPIDriver::spiRead(uint8_t reg)
 
 uint8_t RHSPIDriver::spiWrite(uint8_t reg, uint8_t val)
 {
+
     uint8_t status = 0;
     ATOMIC_BLOCK_START;
 #if defined(SPI_HAS_TRANSACTION)

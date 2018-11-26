@@ -87,7 +87,7 @@ RH_RF69::RH_RF69(uint8_t slaveSelectPin, uint8_t interruptPin, RHGenericSPI& spi
     :
     RHSPIDriver(slaveSelectPin, spi)
 {
-    period=OCR3A/2;
+   // period=OCR3A/2;
     _interruptPin = interruptPin;
     _idleMode = RH_RF69_OPMODE_MODE_STDBY;
     _myInterruptIndex = 0xff; // Not allocated yet
@@ -112,7 +112,7 @@ bool RH_RF69::init()
 #endif
 
     // Get the device type and check it
-    // This also tests whether we are really connected to a device
+    // This also tests whether we 11are really connected to a device
     // My test devices return 0x24
     _deviceType = spiRead(RH_RF69_REG_10_VERSION);
     if (_deviceType == 00 ||
@@ -236,6 +236,7 @@ void RH_RF69::readFifo()
     ATOMIC_BLOCK_START;
 
     _spi.begin();
+    SPI.beginTransaction(_spi._settings);
     digitalWrite(_slaveSelectPin, LOW);
     _spi.transfer(RH_RF69_REG_00_FIFO); // Send the start address with the write mask off
     uint8_t payloadlen = _spi.transfer(0); // First byte is payload len (counting the headers)
@@ -243,12 +244,7 @@ void RH_RF69::readFifo()
 	payloadlen >= RH_RF69_HEADER_LEN)
     {
 	_rxHeaderTo = _spi.transfer(0);
-	// Check addressing
 
-	if (_promiscuous ||
-	    _rxHeaderTo == _thisAddress ||
-	    _rxHeaderTo == RH_BROADCAST_ADDRESS)
-	{
 	    // Get the rest of the headers
 	    _rxHeaderFrom  = _spi.transfer(0);
 	    _rxHeaderId    = _spi.transfer(0);
@@ -257,21 +253,31 @@ void RH_RF69::readFifo()
 	    for (_bufLen = 0; _bufLen < (payloadlen - RH_RF69_HEADER_LEN); _bufLen++)
 		_buf[_bufLen] = _spi.transfer(0);
 
+	    if ((_buf[0]==RH_SYNC_FLAG)&&(_buf[1]==1)) //sync message
+	    {
+	        if(((_buf[2]-_oldSecond)==1)||(_oldSecond-_buf[2])==59){
+                intTim=TCNT3;
+                TCNT3=_PHASE;
+                long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE + 1);
+                OCR3A=(unsigned int)p;
+            }
+           // Serial.println("sync");
+            ti=0;
+            _oldSecond=_buf[2];
+	    }
+	    // Check addressing
+
+	if (_promiscuous ||
+	    _rxHeaderTo == _thisAddress ||
+	    _rxHeaderTo == RH_BROADCAST_ADDRESS)
+	{
 	    _rxGood++;
 	    _rxBufValid = true;
-	    if ((_buf[0]==83)&&(_buf[1]==0)) //sync message
-	    {
-            intTim=TCNT3;
-            TCNT3=_PHASE;
-            long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE + 1);
-            OCR3A=(unsigned int)p;
-            ti=0;
 
-            //Serial.println(OCR3A);
-	    }
 	}
     }
     digitalWrite(_slaveSelectPin, HIGH);
+    SPI.endTransaction();
     _spi.end();
     ATOMIC_BLOCK_END;
     // Any junk remaining in the FIFO will be cleared next time we go to receive mode.
@@ -530,6 +536,7 @@ bool RH_RF69::recv(uint8_t* buf, uint8_t* len)
 
 bool RH_RF69::send(const uint8_t* data, uint8_t len)
 {
+
     if (len > RH_RF69_MAX_MESSAGE_LEN)
 	return false;
 
@@ -540,6 +547,7 @@ bool RH_RF69::send(const uint8_t* data, uint8_t len)
 
     ATOMIC_BLOCK_START;
     _spi.begin();
+    SPI.beginTransaction(_spi._settings);
     digitalWrite(_slaveSelectPin, LOW);
     _spi.transfer(RH_RF69_REG_00_FIFO | RH_RF69_SPI_WRITE_MASK); // Send the start address with the write mask on
     _spi.transfer(len + RH_RF69_HEADER_LEN); // Include length of headers
@@ -552,6 +560,7 @@ bool RH_RF69::send(const uint8_t* data, uint8_t len)
     while (len--)
 	_spi.transfer(*data++);
     digitalWrite(_slaveSelectPin, HIGH);
+    SPI.endTransaction();
     _spi.end();
     ATOMIC_BLOCK_END;
     setModeTx(); // Start the transmitter

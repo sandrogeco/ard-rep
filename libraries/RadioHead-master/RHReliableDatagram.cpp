@@ -23,6 +23,7 @@ RHReliableDatagram::RHReliableDatagram(RHGenericDriver& driver, uint8_t thisAddr
     _timeout = RH_DEFAULT_TIMEOUT;
     _retries = RH_DEFAULT_RETRIES;
     memset(_seenIds, 0, sizeof(_seenIds));
+    seconds=0;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -86,6 +87,77 @@ bool RHReliableDatagram::sendtoWait(uint8_t* buf, uint8_t len, uint8_t address)
 		    if (   from == address 
 			   && to == _thisAddress 
 			   && (flags & RH_FLAGS_ACK) 
+			   && (id == thisSequenceNumber))
+		    {
+			// Its the ACK we are waiting for
+			return true;
+		    }
+		    else if (   !(flags & RH_FLAGS_ACK)
+				&& (id == _seenIds[from]))
+		    {
+			// This is a request we have already received. ACK it again
+			acknowledge(id, from);
+		    }
+		    // Else discard it
+		}
+	    }
+	    // Not the one we are waiting for, maybe keep waiting until timeout exhausted
+	    YIELD;
+	}
+	// Timeout exhausted, maybe retry
+	YIELD;
+    }
+    // Retries exhausted
+    return false;
+}
+
+bool RHReliableDatagram::sendtoWaitSync( uint8_t address)
+{
+
+
+    // Assemble the message
+    uint8_t buf[3];
+     uint8_t len=sizeof(buf);
+    uint8_t thisSequenceNumber = ++_lastSequenceNumber;
+    uint8_t retries = 0;
+
+    buf[0]=RH_SYNC_FLAG;
+    buf[2]=seconds%60;
+    while (retries++ <= _retries)
+    {
+    buf[1]=retries;
+	setHeaderId(thisSequenceNumber);
+	setHeaderFlags(RH_FLAGS_NONE, RH_FLAGS_ACK); // Clear the ACK flag
+	sendto(buf, len, address);
+	waitPacketSent();
+	// Never wait for ACKS to broadcasts:
+	if (address == RH_BROADCAST_ADDRESS)
+	    return true;
+
+	if (retries > 1)
+	    _retransmissions++;
+	unsigned long thisSendTime = millis(); // Timeout does not include original transmit time
+
+	// Compute a new timeout, random between _timeout and _timeout*2
+	// This is to prevent collisions on every retransmit
+	// if 2 nodes try to transmit at the same time
+#if (RH_PLATFORM == RH_PLATFORM_RASPI) // use standard library random(), bugs in random(min, max)
+	uint16_t timeout = _timeout + (_timeout * (random() & 0xFF) / 256);
+#else
+	uint16_t timeout = _timeout + (_timeout * random(0, 256) / 256);
+#endif
+	int32_t timeLeft;
+        while ((timeLeft = timeout - (millis() - thisSendTime)) > 0)
+	{
+	    if (waitAvailableTimeout(timeLeft))
+	    {
+		uint8_t from, to, id, flags;
+		if (recvfrom(0, 0, &from, &to, &id, &flags)) // Discards the message
+		{
+		    // Now have a message: is it our ACK?
+		    if (   from == address
+			   && to == _thisAddress
+			   && (flags & RH_FLAGS_ACK)
 			   && (id == thisSequenceNumber))
 		    {
 			// Its the ACK we are waiting for

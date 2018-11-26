@@ -298,6 +298,8 @@
 #define RH_RF69_HAVE_SERIAL
 
 
+
+
 /////////////////////////////////////////////////////////////////////
 /// \class RH_RF69 RH_RF69.h <RH_RF69.h>
 /// \brief Driver to send and receive unaddressed, unreliable datagrams via an RF69 and compatible radio transceiver.
@@ -926,8 +928,10 @@ public:
 
     uint16_t intTim;
     uint16_t _ACQ_RATE, _PHASE,ti;
+    uint8_t ACQ_DRYpin;
 
     long mm;
+    uint8_t _oldSecond;
 
 
 
@@ -987,7 +991,7 @@ protected:
     /// Time in millis since the last preamble was received (and the last time the RSSI was measured)
     uint32_t            _lastPreambleTime;
 
-    uint16_t period;
+
 };
 
 /// @example rf69_client.pde
