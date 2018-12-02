@@ -236,7 +236,7 @@ void RH_RF69::readFifo()
     ATOMIC_BLOCK_START;
 
     _spi.begin();
-    SPI.beginTransaction(_spi._settings);
+    SPI.beginTransaction(_spi._settings); //TODO very ugly check better solution
     digitalWrite(_slaveSelectPin, LOW);
     _spi.transfer(RH_RF69_REG_00_FIFO); // Send the start address with the write mask off
     uint8_t payloadlen = _spi.transfer(0); // First byte is payload len (counting the headers)
@@ -252,13 +252,21 @@ void RH_RF69::readFifo()
 	    // And now the real payload
 	    for (_bufLen = 0; _bufLen < (payloadlen - RH_RF69_HEADER_LEN); _bufLen++)
 		_buf[_bufLen] = _spi.transfer(0);
+		 Serial.print("sync");
+		Serial.print(_buf[1]);
+		Serial.print(" ");
+		Serial.print(_buf[2]);
+		Serial.print(" ");
+		Serial.println(_oldSecond);
+
 
 	    if ((_buf[0]==RH_SYNC_FLAG)&&(_buf[1]==1)) //sync message
+	    
 	    {
 	        if(((_buf[2]-_oldSecond)==1)||(_oldSecond-_buf[2])==59){
                 intTim=TCNT3;
                 TCNT3=_PHASE;
-                long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE + 1);
+                long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE );
                 OCR3A=(unsigned int)p;
             }
            // Serial.println("sync");

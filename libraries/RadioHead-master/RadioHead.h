@@ -936,7 +936,7 @@
  #else
   #include <util/atomic.h>
  #endif
- #define ATOMIC_BLOCK_START     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+ #define ATOMIC_BLOCK_START     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {//TODO we should disable only pin interrupt and leave t3 interrupt
  #define ATOMIC_BLOCK_END }
 #elif (RH_PLATFORM == RH_PLATFORM_CHIPKIT_CORE)
  // UsingChipKIT Core on Arduino IDE
