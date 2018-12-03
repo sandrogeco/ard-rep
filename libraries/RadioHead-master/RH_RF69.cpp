@@ -252,28 +252,30 @@ void RH_RF69::readFifo()
 	    // And now the real payload
 	    for (_bufLen = 0; _bufLen < (payloadlen - RH_RF69_HEADER_LEN); _bufLen++)
 		_buf[_bufLen] = _spi.transfer(0);
-		 Serial.print("sync");
+
+
+
+	    if ((_buf[0]==RH_SYNC_FLAG)&&(_buf[1]==1)){ //sync message
+	    		/* Serial.print("sync");
 		Serial.print(_buf[1]);
 		Serial.print(" ");
 		Serial.print(_buf[2]);
 		Serial.print(" ");
-		Serial.println(_oldSecond);
+		Serial.println(_oldSecond);*/
 
 
-	    if ((_buf[0]==RH_SYNC_FLAG)&&(_buf[1]==1)) //sync message
-	    
-	    {
-	        if(((_buf[2]-_oldSecond)==1)||(_oldSecond-_buf[2])==59){
-                intTim=TCNT3;
-                TCNT3=_PHASE;
-                long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE );
-                OCR3A=(unsigned int)p;
-            }
-           // Serial.println("sync");
+                if(((_buf[2]-_oldSecond)==1)||(_oldSecond-_buf[2])==59){
+                    intTim=TCNT3;
+                    TCNT3=_PHASE;
+                    long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE );
+                    OCR3A=(unsigned int)p;
+
+                }
+
             ti=0;
             _oldSecond=_buf[2];
-	    }
-	    // Check addressing
+         }
+            // Check addressing
 
 	if (_promiscuous ||
 	    _rxHeaderTo == _thisAddress ||
