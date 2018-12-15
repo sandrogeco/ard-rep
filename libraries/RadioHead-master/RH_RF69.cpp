@@ -268,7 +268,7 @@ void RH_RF69::readFifo()
                     intTim=TCNT3;
                     TCNT3=_PHASE;
                     long p=((long)OCR3A *(long)ti+ intTim-_PHASE)/(_ACQ_RATE );
-                    OCR3A=(unsigned int)p;
+                    OCR3A=(unsigned int)((p+OCR3A)/2);
 
                 }
 
